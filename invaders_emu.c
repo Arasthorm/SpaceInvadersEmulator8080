@@ -3,10 +3,10 @@
 
 typedef struct ConditionCodes {
 
-    uint8_t    z:1;
-    uint8_t    s:1;
+    uint8_t    zero:1;
+    uint8_t    sign:1;
     uint8_t    p:1;
-    uint8_t    cy:1;
+    uint8_t    carry:1;
     uint8_t    ac:1;
     uint8_t    pad:3;
 
@@ -43,7 +43,11 @@ int dissasemble_8080(State8080* state){
         case 0x00: printf("NOP"); state->pc++; break;
         case 0x01: printf("LXI B $%02x%02x", *(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x02: printf("STAX B"); state->pc++; break;
-        case 0x03: printf("INX B"); state->pc++; break;
+        case 0x03: printf("INX B");
+
+            state->
+            state->pc++;
+            break;
         case 0x04: printf("INR B"); state->pc++; break;
         case 0x05: printf("DCR B"); state->pc++; break;
         case 0x06: printf("MVI B $%02x",*(state->memory + state->pc +1)); state->pc+=2; break;
@@ -176,14 +180,32 @@ int dissasemble_8080(State8080* state){
         case 0x7e: printf("MOV    A,M"); state->pc++; break;
         case 0x7f: printf("MOV    A,A"); state->pc++; break;
 
-        case 0x80: printf("ADD    B"); state->pc++; break;
-        case 0x81: printf("ADD    C"); state->pc++; break;
-        case 0x82: printf("ADD    D"); state->pc++; break;
-        case 0x83: printf("ADD    E"); state->pc++; break;
-        case 0x84: printf("ADD    H"); state->pc++; break;
-        case 0x85: printf("ADD    L"); state->pc++; break;
-        case 0x86: printf("ADD    M"); state->pc++; break;
-        case 0x87: printf("ADD    A"); state->pc++; break;
+        case 0x80: printf("ADD    B");
+            add((uint16_t)state->b);
+            break;
+
+        case 0x81: printf("ADD    C");
+            add((uint16_t)state->c);
+            break;
+
+        case 0x82: printf("ADD    D");
+            add((uint16_t)state->d);
+            break;
+        case 0x83: printf("ADD    E");
+            add((uint16_t)state->e);
+            break;
+        case 0x84: printf("ADD    H");
+            add((uint16_t)state->h);
+            break;
+        case 0x85: printf("ADD    L");
+            add((uint16_t)state->l);
+            break;
+        case 0x86: printf("ADD    M");
+            add((uint16_t)state->m);
+            break;
+        case 0x87: printf("ADD    A");
+            add((uint16_t)state->a);
+            break;
         case 0x88: printf("ADC    B"); state->pc++; break;
         case 0x89: printf("ADC    C"); state->pc++; break;
         case 0x8a: printf("ADC    D"); state->pc++; break;
@@ -193,14 +215,38 @@ int dissasemble_8080(State8080* state){
         case 0x8e: printf("ADC    M"); state->pc++; break;
         case 0x8f: printf("ADC    A"); state->pc++; break;
 
-        case 0x90: printf("SUB    B"); state->pc++; break;
-        case 0x91: printf("SUB    C"); state->pc++; break;
-        case 0x92: printf("SUB    D"); state->pc++; break;
-        case 0x93: printf("SUB    E"); state->pc++; break;
-        case 0x94: printf("SUB    H"); state->pc++; break;
-        case 0x95: printf("SUB    L"); state->pc++; break;
-        case 0x96: printf("SUB    M"); state->pc++; break;
-        case 0x97: printf("SUB    A"); state->pc++; break;
+        case 0x90: printf("SUB    B");
+            sub(state->b);
+            break;
+
+        case 0x91: printf("SUB    C");
+            sub(state->c);
+            break;
+
+        case 0x92: printf("SUB    D");
+            sub(state->d);
+            break;
+
+        case 0x93: printf("SUB    E");
+            sub(state->e);
+            break;
+
+        case 0x94: printf("SUB    H");
+            sub(state->h);
+            break;
+
+        case 0x95: printf("SUB    L");
+            sub(state->l);
+            break;
+
+        case 0x96: printf("SUB    M");
+            sub(state->m);
+            break;
+
+        case 0x97: printf("SUB    A");
+            sub(state->a);
+            break;
+
         case 0x98: printf("SBB    B"); state->pc++; break;
         case 0x99: printf("SBB    C"); state->pc++; break;
         case 0x9a: printf("SBB    D"); state->pc++; break;
@@ -316,6 +362,34 @@ int dissasemble_8080(State8080* state){
 
 }
 
+void sub(uint8_t toSub){
+
+    uint8_t answer = state->a - state->b;
+    state->cc.zero = (answer & 0xff) == 0;
+    state->cc.sign = (answer & 0x80) >> 7;
+
+    //Falta o parity
+
+    state->a = answer;
+    state->pc++;
+
+}
+
+
+
+void add(uint16_t toAdd){
+
+    uint16_t answer = (uint16_t)state->a + toAdd;
+    state->cc.zero = ((answer & 0xff) == 0);
+    state->cc.carry = (answer > 0xff);
+    state->cc.sign = ((answer & 0x80) >> 7);
+
+    //Falta o parity
+
+    state->a = answer & 0xff;
+    state->pc++;
+}
+
 State8080* InitMemory(){
     State8080* state = calloc(1,sizeof(State8080));
     state->memory = malloc(0x10000); //16k
@@ -333,18 +407,13 @@ void ReadFileIntoMemory(State8080 *state,char* filename, uint32_t offset){
     long fsize = ftell(fp);
     fseek(fp,0,SEEK_SET);
 
-    u_char *state->memory = malloc(fsize);
+    uint8_t *buffer = &state->memory[offset];
 
-    u_char *buffer = &state->memory[offset];
-
-
-    c = fread(state->memory,sizeof(u_char),fsize,fp);
+    c = fread(state->memory,sizeof(uint8_t),fsize,fp);
 
     fclose(fp);
 
 }
-
-
 
 
 int main(int argc, char const *argv[])
@@ -355,9 +424,8 @@ int main(int argc, char const *argv[])
     ReadFileIntoMemory(state,"invaders.h",0);
     ReadFileIntoMemory(state,"invaders.g",0x800);
     ReadFileIntoMemory(state,"invaders.f",0x1000);
-    ReadFileIntoMemory(state,"in")
+    ReadFileIntoMemory(state,"invaders.e",0x1800);
 
-    int state->pc = 0;
     while(state->pc != (fsize-1))
         state->pc = dissasemble_8080(state->memory,state->pc);
 
