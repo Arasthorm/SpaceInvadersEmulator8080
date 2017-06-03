@@ -44,10 +44,9 @@ int dissasemble_8080(State8080* state){
         case 0x01: printf("LXI B $%02x%02x", *(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x02: printf("STAX B"); state->pc++; break;
         case 0x03: printf("INX B");
-
-            state->
-            state->pc++;
+            inx(state->b,state->c);
             break;
+
         case 0x04: printf("INR B"); state->pc++; break;
         case 0x05: printf("DCR B"); state->pc++; break;
         case 0x06: printf("MVI B $%02x",*(state->memory + state->pc +1)); state->pc+=2; break;
@@ -64,7 +63,11 @@ int dissasemble_8080(State8080* state){
         case 0x10: printf("NOP"); state->pc++; break;
         case 0x11: printf("LXI D,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x12: printf("STAX D"); state->pc++; break;
-        case 0x13: printf("INX D"); state->pc++; break;
+        case 0x13: printf("INX D");
+
+            inx(state->d,state->e);
+            break;
+
         case 0x14: printf("INR D"); state->pc++; break;
         case 0x15: printf("DCR D"); state->pc++; break;
         case 0x16: printf("MVI D,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -81,7 +84,10 @@ int dissasemble_8080(State8080* state){
         case 0x20: printf("NOP"); state->pc++; break;
         case 0x21: printf("LXI H,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x22: printf("SHLD $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0x23: printf("INX H"); state->pc++; break;
+        case 0x23: printf("INX H");
+            inx(state->h,state->l);
+            break;
+
         case 0x24: printf("INR H"); state->pc++; break;
         case 0x25: printf("DCR H"); state->pc++; break;
         case 0x26: printf("MVI H,#$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -98,7 +104,11 @@ int dissasemble_8080(State8080* state){
         case 0x30: printf("NOP"); state->pc++; break;
         case 0x31: printf("LXI SP,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x32: printf("STA $%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0x33: printf("INX SP"); state->pc++; break;
+        case 0x33: printf("INX SP");
+            state->sp++;
+            state->pc++;
+            break;
+
         case 0x34: printf("INR M"); state->pc++; break;
         case 0x35: printf("DCR M"); state->pc++; break;
         case 0x36: printf("MVI    M,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -201,7 +211,7 @@ int dissasemble_8080(State8080* state){
             add((uint16_t)state->l);
             break;
         case 0x86: printf("ADD    M");
-            add((uint16_t)state->m);
+            add((uint16_t)(state->h<<8) | (state->l));
             break;
         case 0x87: printf("ADD    A");
             add((uint16_t)state->a);
@@ -240,7 +250,7 @@ int dissasemble_8080(State8080* state){
             break;
 
         case 0x96: printf("SUB    M");
-            sub(state->m);
+            sub((state->h<<8) | (state->l));
             break;
 
         case 0x97: printf("SUB    A");
@@ -361,6 +371,16 @@ int dissasemble_8080(State8080* state){
     return state->pc;
 
 }
+
+void inx(uint8_t toInx, uint8_t toInxNext){
+
+    (uint16_t) new_val = ((uint16_t)(toInx << 8)) | ((uint16_t)(toInxNext));
+    new_val = new_val + 1;
+    toInx = (uint8_t)((new_val & 0xff00) >> 8);
+    toInxNext = (uint8_t)(new_val & 0xff);
+    state->pc++;
+}
+
 
 void sub(uint8_t toSub){
 
