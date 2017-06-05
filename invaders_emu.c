@@ -372,6 +372,24 @@ int dissasemble_8080(State8080* state){
 
 }
 
+uint8_t parity(uint8_t val){
+
+    int counter = 0;
+    int index;
+    for(index = 1;index<9;index++){
+        if((val & 0x01) == 1)
+            counter++;
+
+        val = val >> 1;
+    }
+
+    if((counter % 2) == 0)
+        return 1;
+    else
+        return 0;
+}
+
+
 void inx(uint8_t toInx, uint8_t toInxNext){
 
     (uint16_t) new_val = ((uint16_t)(toInx << 8)) | ((uint16_t)(toInxNext));
@@ -388,7 +406,7 @@ void sub(uint8_t toSub){
     state->cc.zero = (answer & 0xff) == 0;
     state->cc.sign = (answer & 0x80) >> 7;
 
-    //Falta o parity
+    state->cc.parity = parity(answer);
 
     state->a = answer;
     state->pc++;
@@ -404,7 +422,7 @@ void add(uint16_t toAdd){
     state->cc.carry = (answer > 0xff);
     state->cc.sign = ((answer & 0x80) >> 7);
 
-    //Falta o parity
+    state->cc.parity = parity(answer);
 
     state->a = answer & 0xff;
     state->pc++;
