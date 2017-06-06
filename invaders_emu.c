@@ -44,7 +44,7 @@ int dissasemble_8080(State8080* state){
         case 0x01: printf("LXI B $%02x%02x", *(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x02: printf("STAX B"); state->pc++; break;
         case 0x03: printf("INX B");
-            inx(state->b,state->c);
+            dcxInx(state->b,state->c,'i');
             break;
 
         case 0x04: printf("INR B"); state->pc++; break;
@@ -54,7 +54,10 @@ int dissasemble_8080(State8080* state){
         case 0x08: printf("NOP"); state->pc++; break;
         case 0x09: printf("DAD B"); state->pc++; break;
         case 0x0a: printf("LDAX B"); state->pc++; break;
-        case 0x0b: printf("DCX B"); state->pc++; break;
+        case 0x0b: printf("DCX B");
+            dcxInx(state->b,state->c,'d');
+            break;
+
         case 0x0c: printf("INR C"); state->pc++; break;
         case 0x0d: printf("DCR C"); state->pc++; break;
         case 0x0e: printf("MVI C $%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -65,7 +68,7 @@ int dissasemble_8080(State8080* state){
         case 0x12: printf("STAX D"); state->pc++; break;
         case 0x13: printf("INX D");
 
-            inx(state->d,state->e);
+            dcxInx(state->d,state->e,'i');
             break;
 
         case 0x14: printf("INR D"); state->pc++; break;
@@ -75,7 +78,9 @@ int dissasemble_8080(State8080* state){
         case 0x18: printf("NOP"); state->pc++; break;
         case 0x19: printf("DAD D"); state->pc++; break;
         case 0x1a: printf("LDAX D"); state->pc++; break;
-        case 0x1b: printf("DCX D"); state->pc++; break;
+        case 0x1b: printf("DCX D");
+            dcxInx(state->d,state->e,'d');
+            break;
         case 0x1c: printf("INR E"); state->pc++; break;
         case 0x1d: printf("DCR E"); state->pc++; break;
         case 0x1e: printf("MVI E,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -85,7 +90,7 @@ int dissasemble_8080(State8080* state){
         case 0x21: printf("LXI H,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x22: printf("SHLD $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x23: printf("INX H");
-            inx(state->h,state->l);
+            dcxInx(state->h,state->l,'i');
             break;
 
         case 0x24: printf("INR H"); state->pc++; break;
@@ -95,7 +100,9 @@ int dissasemble_8080(State8080* state){
         case 0x28: printf("NOP"); state->pc++; break;
         case 0x29: printf("DAD H"); state->pc++; break;
         case 0x2a: printf("LHLD $%02x%02x",*(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0x2b: printf("DCX H"); state->pc++; break;
+        case 0x2b: printf("DCX H");
+            dcxInx(state->h,state->l,'d');
+            break;
         case 0x2c: printf("INR L"); state->pc++; break;
         case 0x2d: printf("DCR L"); state->pc++; break;
         case 0x2e: printf("MVI L,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -116,7 +123,10 @@ int dissasemble_8080(State8080* state){
         case 0x38: printf("NOP"); state->pc++; break;
         case 0x39: printf("DAD SP"); state->pc++; break;
         case 0x3a: printf("LDA $%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0x3b: printf("DCX    SP"); state->pc++; break;
+        case 0x3b: printf("DCX    SP");
+            state->sp--;
+            state->pc++;
+            break;
         case 0x3c: printf("INR    A"); state->pc++; break;
         case 0x3d: printf("DCR    A"); state->pc++; break;
         case 0x3e: printf("MVI    A,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -389,16 +399,24 @@ uint8_t parity(uint8_t val){
         return 0;
 }
 
+void dcxInx(uint8_t register1, uint8_t register2,char op){
 
-void inx(uint8_t toInx, uint8_t toInxNext){
+    (uint16_t) new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
 
-    (uint16_t) new_val = ((uint16_t)(toInx << 8)) | ((uint16_t)(toInxNext));
-    new_val = new_val + 1;
-    toInx = (uint8_t)((new_val & 0xff00) >> 8);
-    toInxNext = (uint8_t)(new_val & 0xff);
+    switch(op){
+        case 'i':
+            new_val = new_val + 1;
+            break;
+        case 'd':
+            new_val = new_val - 1;
+            break;
+    }
+
+    register1 = (uint8_t)((new_val & 0xff00) >> 8);
+    register2 = (uint8_t)(new_val & 0xff);
     state->pc++;
-}
 
+}
 
 void sub(uint8_t toSub){
 
