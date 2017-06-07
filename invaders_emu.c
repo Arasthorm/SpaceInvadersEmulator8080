@@ -52,7 +52,11 @@ int dissasemble_8080(State8080* state){
         case 0x06: printf("MVI B $%02x",*(state->memory + state->pc +1)); state->pc+=2; break;
         case 0x07: printf("RLC"); state->pc++; break;
         case 0x08: printf("NOP"); state->pc++; break;
-        case 0x09: printf("DAD B"); state->pc++; break;
+        case 0x09: printf("DAD B");
+
+            dad(state->b,state->c);
+            break;
+
         case 0x0a: printf("LDAX B"); state->pc++; break;
         case 0x0b: printf("DCX B");
             dcxInx(state->b,state->c,'d');
@@ -76,7 +80,11 @@ int dissasemble_8080(State8080* state){
         case 0x16: printf("MVI D,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0x17: printf("RAL"); state->pc++; break;
         case 0x18: printf("NOP"); state->pc++; break;
-        case 0x19: printf("DAD D"); state->pc++; break;
+        case 0x19: printf("DAD D");
+
+            dad(state->d,state->e);
+            break;
+
         case 0x1a: printf("LDAX D"); state->pc++; break;
         case 0x1b: printf("DCX D");
             dcxInx(state->d,state->e,'d');
@@ -98,7 +106,11 @@ int dissasemble_8080(State8080* state){
         case 0x26: printf("MVI H,#$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0x27: printf("DAA"); state->pc++; break;
         case 0x28: printf("NOP"); state->pc++; break;
-        case 0x29: printf("DAD H"); state->pc++; break;
+        case 0x29: printf("DAD H");
+
+        dad(state->h,state->l);
+        break;
+
         case 0x2a: printf("LHLD $%02x%02x",*(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x2b: printf("DCX H");
             dcxInx(state->h,state->l,'d');
@@ -121,7 +133,10 @@ int dissasemble_8080(State8080* state){
         case 0x36: printf("MVI    M,#$%02x", *(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0x37: printf("STC"); state->pc++; break;
         case 0x38: printf("NOP"); state->pc++; break;
-        case 0x39: printf("DAD SP"); state->pc++; break;
+        case 0x39: printf("DAD SP");
+            dad((uint8_t)((sp & 0xff00) >> 8),(uint8_t)(sp & 0x00ff));
+
+            break;
         case 0x3a: printf("LDA $%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0x3b: printf("DCX    SP");
             state->sp--;
@@ -397,6 +412,22 @@ uint8_t parity(uint8_t val){
         return 1;
     else
         return 0;
+}
+
+void dad(uint8_t register1, uint8_t register2){
+
+    (uint16_t) h_l = ((uint16_t)(state->h << 8)) | ((uint16_t)(state->l));
+    (uint16_t) new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
+    uint32_t result = h_l + new_val;
+
+    state->cc.carry = (result > 0xffff);
+
+    h_l = (result & 0xffff);
+
+    state->h = (uint8_t)((new_val & 0xff00) >> 8);
+    state->l = (uint8_t)(new_val & 0xff);
+
+    state->pc++;
 }
 
 void dcxInx(uint8_t register1, uint8_t register2,char op){
