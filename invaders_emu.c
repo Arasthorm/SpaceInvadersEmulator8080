@@ -1,11 +1,13 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 typedef struct ConditionCodes {
 
     uint8_t    zero:1;
     uint8_t    sign:1;
-    uint8_t    p:1;
+    uint8_t    parity:1;
     uint8_t    carry:1;
     uint8_t    ac:1;
     uint8_t    pad:3;
@@ -29,6 +31,7 @@ typedef struct State8080 {
 
 } State8080;
 
+State8080* state;
 
  void UnimplementedInstruction(State8080* state)
    {
@@ -134,7 +137,7 @@ int dissasemble_8080(State8080* state){
         case 0x37: printf("STC"); state->pc++; break;
         case 0x38: printf("NOP"); state->pc++; break;
         case 0x39: printf("DAD SP");
-            dad((uint8_t)((sp & 0xff00) >> 8),(uint8_t)(sp & 0x00ff));
+            dad((uint8_t)((state->sp & 0xff00) >> 8),(uint8_t)(state->sp & 0x00ff));
 
             break;
         case 0x3a: printf("LDA $%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3; break;
@@ -416,8 +419,8 @@ uint8_t parity(uint8_t val){
 
 void dad(uint8_t register1, uint8_t register2){
 
-    (uint16_t) h_l = ((uint16_t)(state->h << 8)) | ((uint16_t)(state->l));
-    (uint16_t) new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
+    uint16_t h_l = ((uint16_t)(state->h << 8)) | ((uint16_t)(state->l));
+    uint16_t new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
     uint32_t result = h_l + new_val;
 
     state->cc.carry = (result > 0xffff);
@@ -432,7 +435,7 @@ void dad(uint8_t register1, uint8_t register2){
 
 void dcxInx(uint8_t register1, uint8_t register2,char op){
 
-    (uint16_t) new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
+    uint16_t new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
 
     switch(op){
         case 'i':
@@ -513,8 +516,7 @@ int main(int argc, char const *argv[])
     ReadFileIntoMemory(state,"invaders.f",0x1000);
     ReadFileIntoMemory(state,"invaders.e",0x1800);
 
-    while(state->pc != (fsize-1))
-        state->pc = dissasemble_8080(state->memory,state->pc);
+    dissasemble_8080(state);
 
     return 0;
 }
