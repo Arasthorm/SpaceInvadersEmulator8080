@@ -330,8 +330,19 @@ int dissasemble_8080(State8080* state){
 
         case 0xc0: printf("RNZ"); state->pc++; break;
         case 0xc1: printf("POP    B"); state->pc++; break;
-        case 0xc2: printf("JNZ    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0xc3: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
+        case 0xc2: printf("JNZ    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+          jnz((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
+
+         break;
+        
+
+        case 0xc3: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1));
+            
+            jmp((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
+         
+         break;
+        
+
         case 0xc4: printf("CNZ    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xc5: printf("PUSH   B"); state->pc++; break;
         case 0xc6: printf("ADI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -339,7 +350,12 @@ int dissasemble_8080(State8080* state){
         case 0xc8: printf("RZ"); state->pc++; break;
         case 0xc9: printf("RET"); state->pc++; break;
         case 0xca: printf("JZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0xcb: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
+        case 0xcb: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+            
+            jmp((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
+        
+         break;
+        
         case 0xcc: printf("CZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xcd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xce: printf("ACI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
@@ -400,6 +416,7 @@ int dissasemble_8080(State8080* state){
 
 }
 
+
 uint8_t parity(uint8_t val){
 
     int counter = 0;
@@ -415,6 +432,24 @@ uint8_t parity(uint8_t val){
         return 1;
     else
         return 0;
+}
+
+
+void jnz(uint16_t address){
+    
+    if (state->cc.zero == 0)
+    {
+        state->pc = address; 
+    }else{
+        state->pc += 3;
+    }
+}
+
+
+void jmp(uint16_t address){
+
+    state->pc = address;
+
 }
 
 void dad(uint8_t register1, uint8_t register2){
