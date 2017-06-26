@@ -151,71 +151,152 @@ int dissasemble_8080(State8080* state){
         case 0x3f: printf("CMC"); state->pc++; break;
 
         case 0x40: printf("MOV    B,B"); state->pc++; break;
+
         case 0x41: printf("MOV    B,C"); state->pc++; break;
+        
         case 0x42: printf("MOV    B,D"); state->pc++; break;
+        
         case 0x43: printf("MOV    B,E"); state->pc++; break;
+        
         case 0x44: printf("MOV    B,H"); state->pc++; break;
+        
         case 0x45: printf("MOV    B,L"); state->pc++; break;
+        
         case 0x46: printf("MOV    B,M"); state->pc++; break;
+        
         case 0x47: printf("MOV    B,A"); state->pc++; break;
+        
         case 0x48: printf("MOV    C,B"); state->pc++; break;
+        
         case 0x49: printf("MOV    C,C"); state->pc++; break;
+        
         case 0x4a: printf("MOV    C,D"); state->pc++; break;
+        
         case 0x4b: printf("MOV    C,E"); state->pc++; break;
+        
         case 0x4c: printf("MOV    C,H"); state->pc++; break;
+        
         case 0x4d: printf("MOV    C,L"); state->pc++; break;
+        
         case 0x4e: printf("MOV    C,M"); state->pc++; break;
+        
         case 0x4f: printf("MOV    C,A"); state->pc++; break;
 
         case 0x50: printf("MOV    D,B"); state->pc++; break;
+        
         case 0x51: printf("MOV    D,C"); state->pc++; break;
+        
         case 0x52: printf("MOV    D,D"); state->pc++; break;
+        
         case 0x53: printf("MOV    D.E"); state->pc++; break;
+        
         case 0x54: printf("MOV    D,H"); state->pc++; break;
+        
         case 0x55: printf("MOV    D,L"); state->pc++; break;
-        case 0x56: printf("MOV    D,M"); state->pc++; break;
+        
+        case 0x56: printf("MOV    D,M"); 
+
+            mov(state->d,state->m);
+            state->pc++; 
+            break;
+        
         case 0x57: printf("MOV    D,A"); state->pc++; break;
+        
         case 0x58: printf("MOV    E,B"); state->pc++; break;
+        
         case 0x59: printf("MOV    E,C"); state->pc++; break;
+        
         case 0x5a: printf("MOV    E,D"); state->pc++; break;
+        
         case 0x5b: printf("MOV    E,E"); state->pc++; break;
+        
         case 0x5c: printf("MOV    E,H"); state->pc++; break;
+        
         case 0x5d: printf("MOV    E,L"); state->pc++; break;
+        
         case 0x5e: printf("MOV    E,M"); state->pc++; break;
+        
         case 0x5f: printf("MOV    E,A"); state->pc++; break;
 
         case 0x60: printf("MOV    H,B"); state->pc++; break;
+        
         case 0x61: printf("MOV    H,C"); state->pc++; break;
+        
         case 0x62: printf("MOV    H,D"); state->pc++; break;
+        
         case 0x63: printf("MOV    H.E"); state->pc++; break;
+        
         case 0x64: printf("MOV    H,H"); state->pc++; break;
+        
         case 0x65: printf("MOV    H,L"); state->pc++; break;
+        
         case 0x66: printf("MOV    H,M"); state->pc++; break;
+        
         case 0x67: printf("MOV    H,A"); state->pc++; break;
+        
         case 0x68: printf("MOV    L,B"); state->pc++; break;
+        
         case 0x69: printf("MOV    L,C"); state->pc++; break;
+        
         case 0x6a: printf("MOV    L,D"); state->pc++; break;
+        
         case 0x6b: printf("MOV    L,E"); state->pc++; break;
+        
         case 0x6c: printf("MOV    L,H"); state->pc++; break;
+        
         case 0x6d: printf("MOV    L,L"); state->pc++; break;
+        
         case 0x6e: printf("MOV    L,M"); state->pc++; break;
-        case 0x6f: printf("MOV    L,A"); state->pc++; break;
+        
+        case 0x6f: printf("MOV    L,A"); 
+            
+            state->l = state->a;
+            state->pc++; 
+            break;
+
 
         case 0x70: printf("MOV    M,B"); state->pc++; break;
+        
         case 0x71: printf("MOV    M,C"); state->pc++; break;
+        
         case 0x72: printf("MOV    M,D"); state->pc++; break;
+        
         case 0x73: printf("MOV    M.E"); state->pc++; break;
+        
         case 0x74: printf("MOV    M,H"); state->pc++; break;
+        
         case 0x75: printf("MOV    M,L"); state->pc++; break;
-        case 0x76: printf("HLT");        state->pc++; break;
+        
+        case 0x76: printf("HLT");        
+
+            exit(0);
+        
         case 0x77: printf("MOV    M,A"); state->pc++; break;
+        
         case 0x78: printf("MOV    A,B"); state->pc++; break;
+        
         case 0x79: printf("MOV    A,C"); state->pc++; break;
-        case 0x7a: printf("MOV    A,D"); state->pc++; break;
-        case 0x7b: printf("MOV    A,E"); state->pc++; break;
-        case 0x7c: printf("MOV    A,H"); state->pc++; break;
+        
+        case 0x7a: printf("MOV    A,D"); 
+            
+            mov(state->a,state->d);
+            state->pc++; 
+            break;
+        
+        case 0x7b: printf("MOV    A,E"); 
+            mov(state->a,state->e);
+            state->pc++; 
+            break;
+        
+        case 0x7c: printf("MOV    A,H"); 
+            mov(state->a,state->h);
+            state->pc++; 
+            break;
+        
         case 0x7d: printf("MOV    A,L"); state->pc++; break;
+        
         case 0x7e: printf("MOV    A,M"); state->pc++; break;
+        
         case 0x7f: printf("MOV    A,A"); state->pc++; break;
 
         case 0x80: printf("ADD    B");
@@ -348,16 +429,24 @@ int dissasemble_8080(State8080* state){
         case 0xc6: printf("ADI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0xc7: printf("RST    0"); state->pc++; break;
         case 0xc8: printf("RZ"); state->pc++; break;
-        case 0xc9: printf("RET"); state->pc++; break;
+        case 0xc9: printf("RET"); 
+
+            ret(); 
+            break;
+        
         case 0xca: printf("JZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xcb: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
             
             jmp((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
         
-         break;
+            break;
         
         case 0xcc: printf("CZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0xcd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
+        case 0xcd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+
+            call(state->pc + 3);
+            break;
+
         case 0xce: printf("ACI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0xcf: printf("RST    1"); state->pc++; break;
 
@@ -370,11 +459,19 @@ int dissasemble_8080(State8080* state){
         case 0xd6: printf("SUI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0xd7: printf("RST    2"); state->pc++; break;
         case 0xd8: printf("RC");  state->pc++; break;
-        case 0xd9: printf("RET"); state->pc++; break;
+        case 0xd9: printf("RET"); 
+        
+            ret(); 
+            break;
+        
         case 0xda: printf("JC     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xdb: printf("IN     #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0xdc: printf("CC     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0xdd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
+        case 0xdd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+
+            call(state->pc + 3);
+            break;
+        
         case 0xde: printf("SBI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0xdf: printf("RST    3"); state->pc++; break;
 
@@ -391,7 +488,11 @@ int dissasemble_8080(State8080* state){
         case 0xea: printf("JPE    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xeb: printf("XCHG"); state->pc++; break;
         case 0xec: printf("CPE     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0xed: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
+        case 0xed: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+        
+            call(state->pc + 3);
+                break;
+        
         case 0xee: printf("XRI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2; break;
         case 0xef: printf("RST    5"); state->pc++; break;
 
@@ -408,7 +509,12 @@ int dissasemble_8080(State8080* state){
         case 0xfa: printf("JM     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
         case 0xfb: printf("EI");  state->pc++; break;
         case 0xfc: printf("CM     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
-        case 0xfd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3; break;
+        case 0xfd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+            
+            call(state->pc + 3);
+            break;
+        
+        
         case 0xfe: printf("CPI    #$%02x",*(state->memory + state->pc + 1));state->pc+=2; break;
         case 0xff: printf("RST 7"); state->pc++; break;
     }
@@ -432,6 +538,31 @@ uint8_t parity(uint8_t val){
         return 1;
     else
         return 0;
+}
+
+
+void mov(uint8_t toRcv, uint8_t toTrans){
+
+    toRcv = toTrans;
+}
+
+
+
+
+void call(uint16_t ret){
+
+    state->memory[state->sp-1] = (ret >> 8) & 0xff;
+    state->memory[state->sp-2] = ret & 0xff;
+
+    state->sp = state->sp - 2;
+    state->pc = (state->memory[state->pc + 2] << 8) | state->memory[state->pc + 1]; 
+}
+
+void ret(){
+    
+    state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);    
+    state->sp += 2;
+
 }
 
 
