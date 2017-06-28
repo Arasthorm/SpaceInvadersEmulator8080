@@ -39,6 +39,8 @@ State8080* state;
     exit(1);
    }
 
+uint8_t parity(uint8_t );
+
 int dissasemble_8080(State8080* state){
 
     switch(*(state->memory + state->pc)){
@@ -173,7 +175,7 @@ int dissasemble_8080(State8080* state){
 
         case 0x30: printf("NOP"); state->pc++;UnimplementedInstruction(state); break;
         case 0x31: printf("LXI SP,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
-            sp = state->memory[state->pc + 2] | state->memory[state->pc + 1];
+            state->sp = state->memory[state->pc + 2] | state->memory[state->pc + 1];
             state->pc+=3;
             break;
         
@@ -497,6 +499,12 @@ int dissasemble_8080(State8080* state){
         case 0xaf: printf("XRA    A"); 
 
             state->a = (state->a ^ state->a);
+
+            state->cc.carry = state->cc.ac = 0;
+            state->cc.zero = (state->a == 0);
+            state->cc.sign = (0x80 == (state->a & 0x80));
+            state->cc.parity = parity(state->a);
+
             state->pc++;
             break;
 
@@ -544,7 +552,15 @@ int dissasemble_8080(State8080* state){
             break;
         
         case 0xc6: printf("ADI    #$%02x",*(state->memory + state->pc + 1)); 
-            state->a = state->a + state->memory[state->pc + 1];
+            
+            uint16_t resAdi = (uint16_t) state->a + (uint16_t) state->memory[state->pc + 1];
+            
+            state->cc.zero = ((resAdi & 0xff) == 0);
+            state->cc.sign = (0x80 == (resAdi & 0x80));
+            state->cc.parity = parity(resAdi & 0xff);
+            state->cc.carry = (resAdi > 0xff);
+            state->a = (uint8_t) resAdi;
+
             state->pc+=2;
             break;
         
@@ -578,7 +594,13 @@ int dissasemble_8080(State8080* state){
             break;
 
         case 0xd2: printf("JNC    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
-        case 0xd3: printf("OUT    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2;UnimplementedInstruction(state); break;
+        case 0xd3: printf("OUT    #$%02x",*(state->memory + state->pc + 1)); 
+            
+           // state->memory[state->memory[state->pc + 1]] = state->a;
+            state->pc+=2;
+            UnimplementedInstruction(state); 
+            break;
+        
         case 0xd4: printf("CNC    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xd5: printf("PUSH   D"); 
             
@@ -622,15 +644,36 @@ int dissasemble_8080(State8080* state){
             break;
 
         case 0xe6: printf("ANI    #$%02x",*(state->memory + state->pc + 1)); 
+            
             state->a = state->a & state->memory[state->pc + 1];
+            
+            state->cc.carry = state->cc.ac = 0;
+            state->cc.zero = (state->a == 0);
+            state->cc.sign = (0x80 == (state->a & 0x80));
+            state->cc.parity = parity(state->a);
             state->pc+=2;
+            
             break;
         
         case 0xe7: printf("RST    4"); state->pc++;UnimplementedInstruction(state); break;
         case 0xe8: printf("RPE"); state->pc++;UnimplementedInstruction(state); break;
         case 0xe9: printf("PCHL");state->pc++;UnimplementedInstruction(state); break;
         case 0xea: printf("JPE    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
-        case 0xeb: printf("XCHG"); state->pc++;UnimplementedInstruction(state); break;
+        case 0xeb: printf("XCHG"); 
+            
+            uint8_t save_h = state->h;
+            uint8_t save_l = state->l;
+
+            state->h = state->d;
+            state->l = state->e;
+
+            state->d = save_h;
+            state->e = save_l;
+
+            state->pc++; 
+            
+            break;
+
         case 0xec: printf("CPE     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xed: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
         
@@ -661,7 +704,12 @@ int dissasemble_8080(State8080* state){
         case 0xf8: printf("RM");  state->pc++;UnimplementedInstruction(state); break;
         case 0xf9: printf("SPHL");state->pc++;UnimplementedInstruction(state); break;
         case 0xfa: printf("JM     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
-        case 0xfb: printf("EI");  state->pc++;UnimplementedInstruction(state); break;
+        case 0xfb: printf("EI");  
+            
+            state->int_enable = 1;    
+            state->pc++; 
+            break;
+        
         case 0xfc: printf("CM     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xfd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
             
@@ -669,7 +717,17 @@ int dissasemble_8080(State8080* state){
             break;
         
         
-        case 0xfe: printf("CPI    #$%02x",*(state->memory + state->pc + 1));state->pc+=2;UnimplementedInstruction(state); break;
+        case 0xfe: printf("CPI    #$%02x",*(state->memory + state->pc + 1));
+            
+            uint8_t res = state->a - state->memory[state->pc + 1];
+            state->cc.zero = (res == 0);
+            state->cc.sign = (0x80 == (res & 0x80)); //Verifica se o setimo bit está set ou nao
+            state->cc.parity = parity(res);
+            state->cc.carry = (state->a < state->memory[state->pc + 1]);
+            state->pc+=2; 
+            
+            break;
+        
         case 0xff: printf("RST 7"); state->pc++;UnimplementedInstruction(state); break;
     }
     return state->pc;
@@ -764,7 +822,12 @@ void pop(uint8_t register1, uint8_t register2){
 
 
 void ana(uint8_t register1){
-    state->a = ((state->a & register1) & 0xFF); 
+    state->a = ((state->a & register1) & 0xFF);
+
+    state->cc.carry = state->cc.ac = 0;
+    state->cc.zero = (state->a == 0);
+    state->cc.sign = (0x80 == (state->a & 0x80));
+    state->cc.parity = parity(state->a); 
 }
 
 
