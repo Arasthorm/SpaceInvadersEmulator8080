@@ -84,7 +84,14 @@ int dissasemble_8080(State8080* state){
             state->pc+=2; 
             break;
         
-        case 0x0f: printf("RRC"); state->pc++;UnimplementedInstruction(state); break;
+        case 0x0f: printf("RRC"); 
+            
+            uint8_t x = state->a;
+            state->a = ((x & 1) << 7) | (x >> 1);
+            state->cc.carry = (1 == (x&1));
+
+            state->pc++; 
+            break;
 
         case 0x10: printf("NOP"); state->pc++; break;
         case 0x11: printf("LXI D,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
