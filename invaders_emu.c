@@ -36,6 +36,11 @@ State8080* state;
  void UnimplementedInstruction(State8080* state)
    {
     printf ("Error: Unimplemented instruction\n");
+
+
+    printf("%s\n", "Colocar info de flags");
+
+
     exit(1);
    }
 
@@ -47,17 +52,26 @@ int dissasemble_8080(State8080* state){
 
         case 0x00: printf("NOP"); state->pc++; break;
         case 0x01: printf("LXI B $%02x%02x", *(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
-            lxi(state->b,state->c);
+            
+            lxi(state,'b');
+        
+            //state->b = state->memory[state->pc+2];
+            //state->c = state->memory[state->pc+1];
+
             state->pc+=3;
             break;
-        
+
         case 0x02: printf("STAX B"); state->pc++;UnimplementedInstruction(state); break;
+        
         case 0x03: printf("INX B");
-            dcxInx(state->b,state->c,'i');
+            dcxInx(&state->b,&state->c,'i',state);
             break;
 
         case 0x04: printf("INR B"); state->pc++;UnimplementedInstruction(state); break;
+        
         case 0x05: printf("DCR B"); 
+            
+            UnimplementedInstruction(state);
             
             uint8_t res_b = state->b - 1;
             
@@ -70,26 +84,33 @@ int dissasemble_8080(State8080* state){
             state->pc++;
             break;
         
-        case 0x06: printf("MVI B $%02x",*(state->memory + state->pc +1)); 
+        case 0x06: printf("MVI B $%02x",*(state->memory + state->pc +1));
 
-            mov(state->b,state->memory[state->pc+1]);
+            mov(&state->b,&state->memory[state->pc+1]);
             state->pc+=2; 
+            
             break;
         
         case 0x07: printf("RLC"); state->pc++;UnimplementedInstruction(state); break;
         case 0x08: printf("NOP"); state->pc++; break;
         case 0x09: printf("DAD B");
 
+
+        	UnimplementedInstruction(state);
             dad(state->b,state->c);
             break;
 
         case 0x0a: printf("LDAX B"); state->pc++;UnimplementedInstruction(state); break;
         case 0x0b: printf("DCX B");
-            dcxInx(state->b,state->c,'d');
+
+        	UnimplementedInstruction(state);
+            dcxInx(&state->b,&state->c,'d',state);
             break;
 
         case 0x0c: printf("INR C"); state->pc++;UnimplementedInstruction(state); break;
         case 0x0d: printf("DCR C"); 
+
+        	UnimplementedInstruction(state);
 
             uint8_t res_c = state->c - 1;
             
@@ -105,12 +126,18 @@ int dissasemble_8080(State8080* state){
 
         case 0x0e: printf("MVI C $%02x",*(state->memory + state->pc + 1)); 
 
-            mov(state->c,state->memory[state->pc+1]);
+        	UnimplementedInstruction(state);
+
+            mov(&state->c,&state->memory[state->pc+1]);
+            
             state->pc+=2; 
+            
             break;
         
         case 0x0f: printf("RRC"); 
             
+        	UnimplementedInstruction(state);
+
             uint8_t x = state->a;
             state->a = ((x & 1) << 7) | (x >> 1);
             state->cc.carry = (1 == (x&1));
@@ -121,44 +148,62 @@ int dissasemble_8080(State8080* state){
         case 0x10: printf("NOP"); state->pc++; break;
         case 0x11: printf("LXI D,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
             
-            lxi(state->d,state->e);
+        	UnimplementedInstruction(state);
+
+            lxi(state,'d');
+
+            //state->d = state->memory[state->pc+2];
+            //state->e = state->memory[state->pc+1];
+
             state->pc+=3;
             break;
         
         case 0x12: printf("STAX D"); state->pc++;UnimplementedInstruction(state); break;
         case 0x13: printf("INX D");
 
-            dcxInx(state->d,state->e,'i');
+        	UnimplementedInstruction(state);
+
+            dcxInx(&state->d,&state->e,'i',state);
             break;
 
         case 0x14: printf("INR D"); state->pc++;UnimplementedInstruction(state); break;
         case 0x15: printf("DCR D"); state->pc++;UnimplementedInstruction(state); break;
         case 0x16: printf("MVI D,#$%02x", *(state->memory + state->pc + 1)); 
-            mov(state->d,state->memory[state->pc+1]);
+            
+        	UnimplementedInstruction(state);
+
+            mov(&state->d,&state->memory[state->pc+1]);
             state->pc+=2; 
+            
             break;
         
         case 0x17: printf("RAL"); state->pc++;UnimplementedInstruction(state); break;
         case 0x18: printf("NOP"); state->pc++; break;
         case 0x19: printf("DAD D");
 
+
+        	UnimplementedInstruction(state);
             dad(state->d,state->e);
             break;
 
         case 0x1a: printf("LDAX D"); 
             
+            UnimplementedInstruction(state);
             state->a = state->memory[state->d | state->e];
             state->pc++; 
+            
             break;
         
         case 0x1b: printf("DCX D");
-            dcxInx(state->d,state->e,'d');
+            UnimplementedInstruction(state);
+            dcxInx(&state->d,&state->e,'d',state);
             break;
+
         case 0x1c: printf("INR E"); state->pc++;UnimplementedInstruction(state); break;
         case 0x1d: printf("DCR E"); state->pc++;UnimplementedInstruction(state); break;
         case 0x1e: printf("MVI E,#$%02x", *(state->memory + state->pc + 1)); 
-
-            mov(state->e,state->memory[state->pc+1]);
+        		UnimplementedInstruction(state);
+            mov(&state->e,&state->memory[state->pc+1]);
             state->pc+=2; 
             break;
         
@@ -166,39 +211,49 @@ int dissasemble_8080(State8080* state){
 
         case 0x20: printf("NOP"); state->pc++; break;
         case 0x21: printf("LXI H,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
+        	UnimplementedInstruction(state);
+            lxi(state,'h');
 
-            lxi(state->h,state->l);
+          //  state->h = state->memory[state->pc+2];
+          //  state->l = state->memory[state->pc+1];
+
             state->pc+=3; 
             break;
         
-        case 0x22: printf("SHLD $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
+        case 0x22: printf("SHLD $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+                    
+                    state->pc+=3;UnimplementedInstruction(state); break;
+        
         case 0x23: printf("INX H");
-            dcxInx(state->h,state->l,'i');
+        	UnimplementedInstruction(state);
+            dcxInx(&state->h,&state->l,'i',state);
             break;
 
         case 0x24: printf("INR H"); state->pc++;UnimplementedInstruction(state); break;
         case 0x25: printf("DCR H"); state->pc++;UnimplementedInstruction(state); break;
         case 0x26: printf("MVI H,#$%02x",*(state->memory + state->pc + 1)); 
-            
-            mov(state->h,state->memory[state->pc+1]);
+            UnimplementedInstruction(state);
+            mov(&state->h,&state->memory[state->pc+1]);
             state->pc+=2; 
             break;
         
         case 0x27: printf("DAA"); state->pc++;UnimplementedInstruction(state); break;
         case 0x28: printf("NOP"); state->pc++; break;
         case 0x29: printf("DAD H");
-
+        	UnimplementedInstruction(state);
             dad(state->h,state->l);
             break;
 
         case 0x2a: printf("LHLD $%02x%02x",*(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0x2b: printf("DCX H");
-            dcxInx(state->h,state->l,'d');
+
+        	UnimplementedInstruction(state);
+            dcxInx(&state->h,&state->l,'d',state);
             break;
         case 0x2c: printf("INR L"); state->pc++;UnimplementedInstruction(state); break;
         case 0x2d: printf("DCR L"); state->pc++;UnimplementedInstruction(state); break;
         case 0x2e: printf("MVI L,#$%02x", *(state->memory + state->pc + 1)); 
-            
+            UnimplementedInstruction(state);
             mov(state->l,state->memory[state->pc+1]);
             state->pc+=2; 
             break;
@@ -207,12 +262,17 @@ int dissasemble_8080(State8080* state){
 
         case 0x30: printf("NOP"); state->pc++; break;
         case 0x31: printf("LXI SP,#$%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
-            state->sp = state->memory[state->pc + 2] | state->memory[state->pc + 1];
+            
+            lxi(state,'s');
+
+            //state->sp = (state->memory[state->pc + 2] << 8) | state->memory[state->pc + 1];
             state->pc+=3;
+            
             break;
         
         case 0x32: printf("STA $%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
             
+            UnimplementedInstruction(state);
             uint16_t val = state->memory[state->pc+2] | state->memory[state->pc+1];
             state->memory[val] = state->a;
 
@@ -220,6 +280,7 @@ int dissasemble_8080(State8080* state){
             break;
         
         case 0x33: printf("INX SP");
+        	UnimplementedInstruction(state);
             state->sp++;
             state->pc++;
             break;
@@ -227,7 +288,7 @@ int dissasemble_8080(State8080* state){
         case 0x34: printf("INR M"); state->pc++;UnimplementedInstruction(state); break;
         case 0x35: printf("DCR M"); state->pc++;UnimplementedInstruction(state); break;
         case 0x36: printf("MVI    M,#$%02x", *(state->memory + state->pc + 1)); 
-
+        	UnimplementedInstruction(state);
             state->memory[(state->h<<8) | state->l] = state->memory[state->pc + 1];
             state->pc+=2; 
             break;
@@ -235,19 +296,20 @@ int dissasemble_8080(State8080* state){
         case 0x37: printf("STC"); state->pc++;UnimplementedInstruction(state); break;
         case 0x38: printf("NOP"); state->pc++; break;
         case 0x39: printf("DAD SP");
-            
+            UnimplementedInstruction(state);
             dad((uint8_t)((state->sp & 0xff00) >> 8),(uint8_t)(state->sp & 0x00ff));
             break;
         
         case 0x3a: printf("LDA $%02x%02x", *(state->memory + state->pc + 2), *(state->memory + state->pc + 1)); 
-            
+            UnimplementedInstruction(state);
             uint16_t offset = (state->memory[state->pc + 2]<<8) | state->memory[state->pc + 1];   //2 is MSB
             state->memory[offset]; 
             state->pc+=3; 
+            
             break;
         
         case 0x3b: printf("DCX    SP");
-            
+            UnimplementedInstruction(state);
             state->sp--;
             state->pc++;
             break;
@@ -255,8 +317,8 @@ int dissasemble_8080(State8080* state){
         case 0x3c: printf("INR    A"); state->pc++;UnimplementedInstruction(state); break;
         case 0x3d: printf("DCR    A"); state->pc++;UnimplementedInstruction(state); break;
         case 0x3e: printf("MVI    A,#$%02x", *(state->memory + state->pc + 1)); 
-
-            mov(state->a, state->memory[state->pc + 1]);
+        	UnimplementedInstruction(state);
+            mov(&state->a, &state->memory[state->pc + 1]);
             state->pc+=2; 
             break;
         
@@ -291,7 +353,7 @@ int dissasemble_8080(State8080* state){
         case 0x4d: printf("MOV    C,L"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x4e: printf("MOV    C,M"); 
-
+UnimplementedInstruction(state);
             movM(state->c);
             state->pc++; 
             break;
@@ -311,7 +373,7 @@ int dissasemble_8080(State8080* state){
         case 0x55: printf("MOV    D,L"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x56: printf("MOV    D,M"); 
-
+UnimplementedInstruction(state);
             movM(state->d);
             state->pc++; 
             break;
@@ -331,7 +393,7 @@ int dissasemble_8080(State8080* state){
         case 0x5d: printf("MOV    E,L"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x5e: printf("MOV    E,M"); 
-            
+            UnimplementedInstruction(state);
             movM(state->e);
             state->pc++; 
             break;
@@ -351,7 +413,7 @@ int dissasemble_8080(State8080* state){
         case 0x65: printf("MOV    H,L"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x66: printf("MOV    H,M"); 
-            
+            UnimplementedInstruction(state);
             movM(state->h);
             state->pc++; 
             break;
@@ -373,7 +435,7 @@ int dissasemble_8080(State8080* state){
         case 0x6e: printf("MOV    L,M"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x6f: printf("MOV    L,A"); 
-            
+            UnimplementedInstruction(state);
             mov(state->l,state->a);
             state->pc++; 
             break;
@@ -396,7 +458,7 @@ int dissasemble_8080(State8080* state){
             exit(0);
         
         case 0x77: printf("MOV    M,A"); 
-            
+            UnimplementedInstruction(state);
             uint16_t newVal = (state->h<<8) | (state->l);
             state->memory[newVal] = state->a;
             state->pc++; 
@@ -407,17 +469,19 @@ int dissasemble_8080(State8080* state){
         case 0x79: printf("MOV    A,C"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x7a: printf("MOV    A,D"); 
-            
+            UnimplementedInstruction(state);
             mov(state->a,state->d);
             state->pc++; 
             break;
         
         case 0x7b: printf("MOV    A,E"); 
+            UnimplementedInstruction(state);
             mov(state->a,state->e);
             state->pc++; 
             break;
         
         case 0x7c: printf("MOV    A,H"); 
+            UnimplementedInstruction(state);
             mov(state->a,state->h);
             state->pc++; 
             break;
@@ -425,7 +489,7 @@ int dissasemble_8080(State8080* state){
         case 0x7d: printf("MOV    A,L"); state->pc++;UnimplementedInstruction(state); break;
         
         case 0x7e: printf("MOV    A,M");
-
+UnimplementedInstruction(state);
             movM(state->a); 
             state->pc++; 
             break;
@@ -433,29 +497,45 @@ int dissasemble_8080(State8080* state){
         case 0x7f: printf("MOV    A,A"); state->pc++;UnimplementedInstruction(state); break;
 
         case 0x80: printf("ADD    B");
+            
+        UnimplementedInstruction(state);
             add((uint16_t)state->b);
             break;
 
         case 0x81: printf("ADD    C");
+            UnimplementedInstruction(state);
+
             add((uint16_t)state->c);
             break;
 
         case 0x82: printf("ADD    D");
+            
+UnimplementedInstruction(state);
             add((uint16_t)state->d);
             break;
         case 0x83: printf("ADD    E");
+            
+UnimplementedInstruction(state);
             add((uint16_t)state->e);
             break;
         case 0x84: printf("ADD    H");
+            
+UnimplementedInstruction(state);
             add((uint16_t)state->h);
             break;
         case 0x85: printf("ADD    L");
+            
+UnimplementedInstruction(state);
             add((uint16_t)state->l);
             break;
         case 0x86: printf("ADD    M");
+            
+UnimplementedInstruction(state);
             add((uint16_t)(state->h<<8) | (state->l));
             break;
         case 0x87: printf("ADD    A");
+            
+UnimplementedInstruction(state);
             add((uint16_t)state->a);
             break;
         case 0x88: printf("ADC    B"); state->pc++;UnimplementedInstruction(state); break;
@@ -468,34 +548,46 @@ int dissasemble_8080(State8080* state){
         case 0x8f: printf("ADC    A"); state->pc++;UnimplementedInstruction(state); break;
 
         case 0x90: printf("SUB    B");
+            
+
+            UnimplementedInstruction(state);
             sub(state->b);
             break;
 
         case 0x91: printf("SUB    C");
+            
+
+UnimplementedInstruction(state);
             sub(state->c);
             break;
 
         case 0x92: printf("SUB    D");
+            UnimplementedInstruction(state);
             sub(state->d);
             break;
 
         case 0x93: printf("SUB    E");
+            UnimplementedInstruction(state);
             sub(state->e);
             break;
 
         case 0x94: printf("SUB    H");
+            UnimplementedInstruction(state);
             sub(state->h);
             break;
 
         case 0x95: printf("SUB    L");
+            UnimplementedInstruction(state);
             sub(state->l);
             break;
 
         case 0x96: printf("SUB    M");
+            UnimplementedInstruction(state);
             sub((state->h<<8) | (state->l));
             break;
 
         case 0x97: printf("SUB    A");
+            UnimplementedInstruction(state);
             sub(state->a);
             break;
 
@@ -530,6 +622,7 @@ int dissasemble_8080(State8080* state){
         case 0xae: printf("XRA    M"); state->pc++;UnimplementedInstruction(state); break;
         case 0xaf: printf("XRA    A"); 
 
+        	UnimplementedInstruction(state);
             state->a = (state->a ^ state->a);
 
             state->cc.carry = state->cc.ac = 0;
@@ -538,6 +631,7 @@ int dissasemble_8080(State8080* state){
             state->cc.parity = parity(state->a);
 
             state->pc++;
+            
             break;
 
         case 0xb0: printf("ORA    B"); state->pc++;UnimplementedInstruction(state); break;
@@ -559,32 +653,43 @@ int dissasemble_8080(State8080* state){
 
         case 0xc0: printf("RNZ"); state->pc++;UnimplementedInstruction(state); break;
         case 0xc1: printf("POP    B"); 
-            
+            UnimplementedInstruction(state);
             pop(state->b,state->c);
             state->pc++; 
+            
             break;
 
         case 0xc2: printf("JNZ    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
-          
-            jnz((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
+          UnimplementedInstruction(state);
+            uint16_t jnzAdd = (state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1];
+
+            jnz(&jnzAdd,state);
+            
             break;
         
 
         case 0xc3: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1));
             
-            jmp((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
+            uint16_t address = (state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1];
+            //int *state_pc_add = &state->pc;
+
+
+            jmp(state,address);
+
+            //state->pc=address;
+            
             break;
         
 
         case 0xc4: printf("CNZ    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xc5: printf("PUSH   B"); 
-            
+            UnimplementedInstruction(state);
             push(state->b,state->c);
             state->pc++; 
             break;
         
         case 0xc6: printf("ADI    #$%02x",*(state->memory + state->pc + 1)); 
-            
+            UnimplementedInstruction(state);
             uint16_t resAdi = (uint16_t) state->a + (uint16_t) state->memory[state->pc + 1];
             
             state->cc.zero = ((resAdi & 0xff) == 0);
@@ -599,20 +704,33 @@ int dissasemble_8080(State8080* state){
         case 0xc7: printf("RST    0"); state->pc++;UnimplementedInstruction(state); break;
         case 0xc8: printf("RZ"); state->pc++;UnimplementedInstruction(state); break;
         case 0xc9: printf("RET"); 
+UnimplementedInstruction(state);
+            ret(state); 
 
-            ret(); 
+          //  state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);    
+          //  state->sp += 2;
+
+
             break;
         
-        case 0xca: printf("JZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
+        case 0xca: printf("JZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+            UnimplementedInstruction(state);
+            state->pc+=3;
+            UnimplementedInstruction(state); 
+            break;
+        
         case 0xcb: printf("JMP    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+            UnimplementedInstruction(state);
+            state->pc = (state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1];
+
             
-            jmp((state->memory[state->pc + 2]) << 8 | state->memory[state->pc+1]);
             break;
         
         case 0xcc: printf("CZ     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xcd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
-
-            call(state->pc + 3);
+UnimplementedInstruction(state);
+            call(state);
+    
             break;
 
         case 0xce: printf("ACI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2;UnimplementedInstruction(state); break;
@@ -620,14 +738,14 @@ int dissasemble_8080(State8080* state){
 
         case 0xd0: printf("RNC"); state->pc++;UnimplementedInstruction(state); break;
         case 0xd1: printf("POP    D"); 
-            
+            UnimplementedInstruction(state);
             pop(state->d,state->e);
             state->pc++; 
             break;
 
         case 0xd2: printf("JNC    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xd3: printf("OUT    #$%02x",*(state->memory + state->pc + 1)); 
-            
+            UnimplementedInstruction(state);
            // state->memory[state->memory[state->pc + 1]] = state->a;
             state->pc+=2;
             UnimplementedInstruction(state); 
@@ -635,7 +753,7 @@ int dissasemble_8080(State8080* state){
         
         case 0xd4: printf("CNC    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xd5: printf("PUSH   D"); 
-            
+            UnimplementedInstruction(state);
             push(state->d,state->e);
             state->pc++; 
             break;
@@ -644,16 +762,17 @@ int dissasemble_8080(State8080* state){
         case 0xd7: printf("RST    2"); state->pc++;UnimplementedInstruction(state); break;
         case 0xd8: printf("RC");  state->pc++;UnimplementedInstruction(state); break;
         case 0xd9: printf("RET"); 
-        
-            ret(); 
+        UnimplementedInstruction(state);
+            ret(state); 
             break;
         
         case 0xda: printf("JC     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xdb: printf("IN     #$%02x",*(state->memory + state->pc + 1)); state->pc+=2;UnimplementedInstruction(state); break;
         case 0xdc: printf("CC     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xdd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
+UnimplementedInstruction(state);
+            call(state);
 
-            call(state->pc + 3);
             break;
         
         case 0xde: printf("SBI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2;UnimplementedInstruction(state); break;
@@ -661,7 +780,7 @@ int dissasemble_8080(State8080* state){
 
         case 0xe0: printf("RPO"); state->pc++;UnimplementedInstruction(state); break;
         case 0xe1: printf("POP    H"); 
-            
+            UnimplementedInstruction(state);
             pop(state->h,state->l);
             state->pc++; 
             break;
@@ -670,13 +789,13 @@ int dissasemble_8080(State8080* state){
         case 0xe3: printf("XTHL");state->pc++;UnimplementedInstruction(state); break;
         case 0xe4: printf("CPO    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xe5: printf("PUSH   H"); 
-            
+            UnimplementedInstruction(state);
             push(state->h,state->l);
             state->pc++; 
             break;
 
         case 0xe6: printf("ANI    #$%02x",*(state->memory + state->pc + 1)); 
-            
+            UnimplementedInstruction(state);
             state->a = state->a & state->memory[state->pc + 1];
             
             state->cc.carry = state->cc.ac = 0;
@@ -692,7 +811,7 @@ int dissasemble_8080(State8080* state){
         case 0xe9: printf("PCHL");state->pc++;UnimplementedInstruction(state); break;
         case 0xea: printf("JPE    $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xeb: printf("XCHG"); 
-            
+            UnimplementedInstruction(state);
             uint8_t save_h = state->h;
             uint8_t save_l = state->l;
 
@@ -709,7 +828,10 @@ int dissasemble_8080(State8080* state){
         case 0xec: printf("CPE     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xed: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
         
-            call(state->pc + 3);
+UnimplementedInstruction(state);
+        	call(state);
+            
+           
             break;
         
         case 0xee: printf("XRI    #$%02x",*(state->memory + state->pc + 1)); state->pc+=2;UnimplementedInstruction(state); break;
@@ -717,7 +839,7 @@ int dissasemble_8080(State8080* state){
 
         case 0xf0: printf("RP");  state->pc++;UnimplementedInstruction(state); break;
         case 0xf1: printf("POP    PSW"); 
-            
+            UnimplementedInstruction(state);
             popPSW();
             state->pc++; 
             break;
@@ -726,7 +848,7 @@ int dissasemble_8080(State8080* state){
         case 0xf3: printf("DI");  state->pc++;UnimplementedInstruction(state); break;
         case 0xf4: printf("CP     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xf5: printf("PUSH   PSW"); 
-            
+            UnimplementedInstruction(state);
             pushPSW();    
             state->pc++; 
             break;
@@ -737,7 +859,7 @@ int dissasemble_8080(State8080* state){
         case 0xf9: printf("SPHL");state->pc++;UnimplementedInstruction(state); break;
         case 0xfa: printf("JM     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xfb: printf("EI");  
-            
+            UnimplementedInstruction(state);
             state->int_enable = 1;    
             state->pc++; 
             break;
@@ -745,12 +867,14 @@ int dissasemble_8080(State8080* state){
         case 0xfc: printf("CM     $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); state->pc+=3;UnimplementedInstruction(state); break;
         case 0xfd: printf("CALL   $%02x%02x",*(state->memory + state->pc + 2),*(state->memory + state->pc + 1)); 
             
-            call(state->pc + 3);
+            UnimplementedInstruction(state);
+            call(state);
+            
             break;
         
         
         case 0xfe: printf("CPI    #$%02x",*(state->memory + state->pc + 1));
-            
+            UnimplementedInstruction(state);
             uint8_t res = state->a - state->memory[state->pc + 1];
             state->cc.zero = (res == 0);
             state->cc.sign = (0x80 == (res & 0x80)); //Verifica se o setimo bit está set ou nao
@@ -785,27 +909,67 @@ uint8_t parity(uint8_t val){
 }
 
 
+void lxi(State8080 *state, char regi){
 
-void lxi(uint8_t MSB, uint8_t LSB){
 
-    MSB = state->memory[state->pc+2];
-    LSB = state->memory[state->pc+1];
+    switch(regi){
+        case 'a':
+            
+            state->a = state->memory[state->pc+2];
+            state->b = state->memory[state->pc+1];
+
+            break;
+        case 'b':
+
+            state->b = state->memory[state->pc+2];
+            state->c = state->memory[state->pc+1];
+
+            break;
+
+        case 'c':
+
+            state->c = state->memory[state->pc+2];
+            state->d = state->memory[state->pc+1];
+
+            break;
+
+        case 'd':
+
+            state->d = state->memory[state->pc+2];
+            state->e = state->memory[state->pc+1];
+
+            break;
+
+        case 'h':
+
+            state->h = state->memory[state->pc+2];
+            state->l = state->memory[state->pc+1];
+
+            break;
+
+        case 's':
+
+            state->sp = (state->memory[state->pc + 2] << 8) | state->memory[state->pc + 1];
+            break;
+
+    }
+    
 }
 
 
-void movM(uint8_t registerToRcv){
+void movM(State8080 *state,int *registerToRcv){
 
     uint16_t offset = ((state->h <<8) | state->l);
-    registerToRcv = state->memory[offset];
+    *registerToRcv = state->memory[offset];
 
 }
 
-void mov(uint8_t toRcv, uint8_t toTrans){
+void mov(int *toRcv, int *toTrans){
 
-    toRcv = toTrans;
+    *toRcv = *toTrans;
 }
 
-void popPSW(){
+void popPSW(State8080 *state){
 
     state->a = state->memory[state->sp+1];    
     
@@ -821,7 +985,7 @@ void popPSW(){
 }
 
 
-void pushPSW(){
+void pushPSW(State8080 *state){
 
     state->memory[state->sp-1] = state->a;    
     uint8_t psw = (state->cc.zero |    
@@ -835,7 +999,7 @@ void pushPSW(){
 }
 
 
-void push(uint8_t register1,uint8_t register2){ 
+void push(uint8_t register1,uint8_t register2,State8080 *state){
 
     state->memory[state->sp-1] = register1;
     state->memory[state->sp-2] = register2;
@@ -844,7 +1008,8 @@ void push(uint8_t register1,uint8_t register2){
 
 }
 
-void pop(uint8_t register1, uint8_t register2){
+void pop(uint8_t register1, uint8_t register2,State8080 *state){
+    
     register1 = state->memory[state->sp+1];
     register2 = state->memory[state->sp];
 
@@ -853,53 +1018,57 @@ void pop(uint8_t register1, uint8_t register2){
 }
 
 
-void ana(uint8_t register1){
+void ana(uint8_t register1,State8080 *state){
+    
     state->a = ((state->a & register1) & 0xFF);
 
     state->cc.carry = state->cc.ac = 0;
     state->cc.zero = (state->a == 0);
     state->cc.sign = (0x80 == (state->a & 0x80));
     state->cc.parity = parity(state->a); 
+
 }
 
 
-void call(uint16_t ret){
+void call(State8080 *state){
 
-    state->memory[state->sp-1] = (ret >> 8) & 0xff;
-    state->memory[state->sp-2] = ret & 0xff;
+    state->memory[state->sp-1] = ((state->pc+3) >> 8) & 0xff;
+    state->memory[state->sp-2] = (state->pc+3) & 0xff;
 
     state->sp = state->sp - 2;
     state->pc = (state->memory[state->pc + 2] << 8) | state->memory[state->pc + 1]; 
 }
 
-void ret(){
+void ret(State8080 *state){
      state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);    
      state->sp += 2;
 }
 
 
-void jnz(uint16_t address){
+void jnz(uint16_t *address, State8080 *state){
     
+ //   printf("State Zero: %d\n",state->cc.zero);
+
     if (state->cc.zero == 0)
     {
-        state->pc = address; 
+        state->pc = *address; 
     }else{
         state->pc += 3;
     }
 }
 
 
-void jmp(uint16_t address){
+void jmp(State8080 *state,uint16_t address){
 
     state->pc = address;
 }
 
 
 
-void dad(uint8_t register1, uint8_t register2){
+void dad(uint8_t *register1, uint8_t *register2){
 
     uint16_t h_l = ((uint16_t)(state->h << 8)) | ((uint16_t)(state->l));
-    uint16_t new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
+    uint16_t new_val = ((uint16_t)(*register1 << 8)) | ((uint16_t)(*register2));
     uint32_t result = h_l + new_val;
 
     state->cc.carry = (result > 0xffff);
@@ -912,24 +1081,31 @@ void dad(uint8_t register1, uint8_t register2){
     state->pc++;
 }
 
-void dcxInx(uint8_t register1, uint8_t register2,char op){
+void dcxInx(uint8_t *register1, uint8_t *register2,char op, State8080 *state){
 
-    uint16_t new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
+   // uint16_t new_val = ((uint16_t)(register1 << 8)) | ((uint16_t)(register2));
 
     switch(op){
         case 'i':
-            new_val = new_val + 1;
+            *register1 = *register1 + 1;
+            if(*register2 == 0)
+                *register2 + 1;
+
             break;
         case 'd':
-            new_val = new_val - 1;
+            *register1 = *register1 - 1;
+            if(*register2 == 0)
+                *register2 - 1;
+
             break;
     }
 
-    register1 = (uint8_t)((new_val & 0xff00) >> 8);
-    register2 = (uint8_t)(new_val & 0xff);
+ //   register1 = (uint8_t)((new_val & 0xff00) >> 8);
+ //   register2 = (uint8_t)(new_val & 0xff);
+    
     state->pc++;
-
 }
+
 
 void sub(uint8_t toSub){ 
 
@@ -978,7 +1154,7 @@ void ReadFileIntoMemory(State8080 *state,char* filename, uint32_t offset){
 
     uint8_t *buffer = &state->memory[offset];
 
-    c = fread(state->memory,sizeof(uint8_t),fsize,fp);
+    c = fread(buffer,sizeof(uint8_t),fsize,fp);
 
     fclose(fp);
 
@@ -995,7 +1171,9 @@ int main(int argc, char const *argv[])
     ReadFileIntoMemory(state,"invaders.f",0x1000);
     ReadFileIntoMemory(state,"invaders.e",0x1800);
 
-    dissasemble_8080(state);
+
+    while(1)
+    	dissasemble_8080(state);
 
     return 0;
 }
